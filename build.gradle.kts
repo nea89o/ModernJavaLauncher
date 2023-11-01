@@ -47,6 +47,8 @@ val shadowImpl: Configuration by configurations.creating {
     configurations.implementation.get().extendsFrom(this)
 }
 
+val agentDeps: Configuration by configurations.creating
+
 val shadowOnly: Configuration by configurations.creating {
     attributes {
         this.attribute(TargetJvmVersion.TARGET_JVM_VERSION_ATTRIBUTE, 16)
@@ -63,9 +65,17 @@ dependencies {
     shadowImpl("com.github.Skytils:AsmHelper:91ecc2bd9c")
     shadowImpl(enforcedPlatform(kotlin("bom")))
     shadowImpl(kotlin("stdlib"))
+    agentDeps(project(":agent",configuration = "agentShadow"))
 }
 
 // Tasks:
+
+val doubleWrappedJar by tasks.creating(Zip::class) {
+    archiveFileName.set("agent.jar")
+    destinationDirectory.set(project.layout.buildDirectory.dir("wrapper"))
+    from(agentDeps)
+    into("agent")
+}
 
 tasks.withType(JavaCompile::class) {
     options.encoding = "UTF-8"
@@ -97,6 +107,7 @@ tasks.shadowJar {
     archiveClassifier.set("all-dev")
     relocate("dev.falsehonesty.asmhelper", "moe.nea.modernjava.dep.asmhelper")
     configurations = listOf(shadowImpl, shadowOnly)
+    from(doubleWrappedJar)
 }
 
 tasks.assemble.get().dependsOn(tasks.remapJar)

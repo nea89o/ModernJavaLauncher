@@ -17,6 +17,8 @@ public class FCPFixTweaker implements ITweaker {
 
     @Override
     public void injectIntoClassLoader(LaunchClassLoader classLoader) {
+        classLoader.addClassLoaderExclusion("moe.nea.modernjava.");
+        classLoader.addClassLoaderExclusion("kotlin.");
         classLoader.registerTransformer("moe.nea.modernjava.launch.transform.TransObjectHolderRef");
     }
 

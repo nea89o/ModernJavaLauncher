@@ -9,15 +9,13 @@ java {
 
 
 val shadowOnly: Configuration by configurations.creating {
-    attributes {
-        this.attribute(org.gradle.api.attributes.java.TargetJvmVersion.TARGET_JVM_VERSION_ATTRIBUTE, 11)
-    }
 }
 
 dependencies {
     shadowOnly(implementation("org.ow2.asm:asm:9.4")!!)
     shadowOnly(implementation("org.ow2.asm:asm-commons:9.4")!!)
     shadowOnly("dev.architectury:architectury-pack200:0.1.3")
+    shadowOnly("org.apache.commons:commons-lang3:3.13.0")
 }
 tasks.withType(Jar::class) {
     manifest {
@@ -37,3 +35,8 @@ tasks.jar {
     archiveClassifier.set("thin")
 }
 tasks.assemble.get().dependsOn(tasks.shadowJar)
+
+configurations.create("agentShadow")
+artifacts {
+    add("agentShadow", tasks.shadowJar)
+}

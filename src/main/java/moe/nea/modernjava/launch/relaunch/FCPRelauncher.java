@@ -5,10 +5,14 @@ import moe.nea.modernjava.launch.util.TextIoUtils;
 import moe.nea.modernjava.launch.util.WellKnownBlackboard;
 import net.minecraftforge.fml.common.launcher.FMLTweaker;
 import net.minecraftforge.fml.nea.moe.modernjava.IAMFML;
+import org.apache.commons.io.IOUtils;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.lang.management.ManagementFactory;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -42,7 +46,21 @@ public class FCPRelauncher {
     }
 
     public static File findJavaLauncher() {
-        return new File("/home/nea/.sdkman/candidates/java/16.0.2-tem/bin/java")
+        return new File("/home/nea/.sdkman/candidates/java/16.0.2-tem/bin/java");
+    }
+
+    public static File findAgentJar() {
+        try {
+            File file = File.createTempFile("mjr-agent", ".jar");
+            try (InputStream is = FCPRelauncher.class.getResourceAsStream("/agent/agent.jar");
+                 OutputStream os = Files.newOutputStream(file.toPath())) {
+                assert is != null;
+                IOUtils.copy(is, os);
+            }
+            return file;
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public static void relaunch() {
@@ -50,12 +68,11 @@ public class FCPRelauncher {
         List<String> originalArgs = getOriginalArguments();
 
         File modernJavaPath = findJavaLauncher();
-
-
-        File agentFile;
-        agentFile = new File("/home/nea/src/ModernJavaLauncher/target/build/libs/target.jar");
-
         System.out.println("Located modern minecraft at: " + modernJavaPath);
+
+        File agentFile = findAgentJar();
+        System.out.println("Located agent jar at: " + agentFile);
+
 
         ProcessBuilder processBuilder = new ProcessBuilder();
         processBuilder.inheritIO();
@@ -80,10 +97,10 @@ public class FCPRelauncher {
         }
         if (System.getProperty(PropertyNames.DEBUG_PORT) != null)
             fullCommandLine.add("-agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=*:" + System.getProperty(PropertyNames.DEBUG_PORT));
-        fullCommandLine.add("-javaagent:" + agentFile);
+        fullCommandLine.add("-javaagent:" + agentFile.getAbsolutePath());
         fullCommandLine.add("--add-modules=ALL-MODULE-PATH,ALL-SYSTEM,ALL-DEFAULT,java.sql");
-        fullCommandLine.add("-Xbootclasspath/a:" + agentFile);
-        fullCommandLine.add("moe.nea.modernjava.target.RelaunchEntryPoint");
+        fullCommandLine.add("-Xbootclasspath/a:" + agentFile.getAbsolutePath());
+        fullCommandLine.add("moe.nea.modernjava.agent.RelaunchEntryPoint");
         fullCommandLine.addAll(originalArgs);
 
         System.out.println("Full relaunch commandline: " + fullCommandLine);
