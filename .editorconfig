@@ -1,0 +1,5 @@
+root = true
+
+[*.java]
+ij_java_use_single_class_imports = true
+
