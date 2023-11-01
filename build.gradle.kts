@@ -30,12 +30,16 @@ loom {
     }
 }
 
-repositories {
-    mavenCentral()
-    maven("https://jitpack.io") {
-        content {
-            includeGroupByRegex("(com|io)\\.github\\..+")
+allprojects {
+    repositories {
+        mavenCentral()
+        maven("https://jitpack.io") {
+            content {
+                includeGroupByRegex("(com|io)\\.github\\..+")
+            }
         }
+        maven("https://maven.architectury.dev/")
+        maven("https://repository.ow2.org/nexus/content/repositories/releases/")
     }
 }
 
@@ -91,6 +95,7 @@ tasks.jar {
 
 tasks.shadowJar {
     archiveClassifier.set("all-dev")
+    relocate("dev.falsehonesty.asmhelper", "moe.nea.modernjava.dep.asmhelper")
     configurations = listOf(shadowImpl, shadowOnly)
 }
 

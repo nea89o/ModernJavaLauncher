@@ -5,14 +5,22 @@ import dev.falsehonesty.asmhelper.dsl.instructions.InsnListBuilder
 import dev.falsehonesty.asmhelper.dsl.instructions.InvokeType
 import dev.falsehonesty.asmhelper.dsl.modify
 import dev.falsehonesty.asmhelper.dsl.overwrite
+import moe.nea.modernjava.launch.util.ObjectHolderRefCompanion
 import net.minecraft.launchwrapper.Launch
 import net.minecraft.launchwrapper.LaunchClassLoader
 import org.objectweb.asm.Opcodes
 import org.objectweb.asm.tree.AbstractInsnNode
 import org.objectweb.asm.tree.FieldInsnNode
 
+/**
+ * Transform [net.minecraftforge.fml.common.registry.ObjectHolderRef] such that it does not make references to outdated
+ * Java Reflection Tools anymore
+ */
 class TransObjectHolderRef : BaseClassTransformer() {
     override fun makeTransformers() {
+        /**
+         * Redirect the makeWritable call to [ObjectHolderRefCompanion]
+         */
         overwrite {
             className = "net.minecraftforge.fml.common.registry.ObjectHolderRef"
             methodName = "makeWritable"
@@ -22,13 +30,16 @@ class TransObjectHolderRef : BaseClassTransformer() {
                 aload(0/* arg0 */)
                 invoke(
                     InvokeType.STATIC,
-                    "moe/nea/modernjava/launch/util/ReflectionUtils",
+                    "moe/nea/modernjava/launch/util/ObjectHolderRefCompanion",
                     "makeFieldWritable",
                     "(Ljava/lang/reflect/Field;)V"
                 )
                 methodReturn()
             }
         }
+        /**
+         * Redirect the reflection calls to write a value to a static field in apply to [ObjectHolderRefCompanion]
+         */
         modify("net/minecraftforge/fml/common/registry/ObjectHolderRef") {
             var end: AbstractInsnNode? = null
             var start: AbstractInsnNode? = null
@@ -56,7 +67,7 @@ class TransObjectHolderRef : BaseClassTransformer() {
                 getField("net/minecraftforge/fml/common/registry/ObjectHolderRef", "field", "Ljava/lang/reflect/Field;")
                 aload(1 /*thing*/)
                 invokeStatic(
-                    "moe/nea/modernjava/launch/util/ReflectionUtils",
+                    "moe/nea/modernjava/launch/util/ObjectHolderRefCompanion",
                     "doFieldWrite",
                     "(Ljava/lang/reflect/Field;Ljava/lang/Object;)V"
                 )
@@ -86,8 +97,7 @@ class TransObjectHolderRef : BaseClassTransformer() {
         val classLoader: LaunchClassLoader = Launch.classLoader
 
         classLoader.addTransformerExclusion("kotlin.")
-        classLoader.addTransformerExclusion("dev.falsehonesty.asmhelper.")
-        classLoader.addTransformerExclusion("org.objenesis.")
+        classLoader.addTransformerExclusion("moe.nea.modernjava.dep.asmhelper.")
         classLoader.addTransformerExclusion(this.javaClass.name)
 
         setup(classLoader)

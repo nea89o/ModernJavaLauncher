@@ -13,11 +13,6 @@ val shadowOnly: Configuration by configurations.creating {
         this.attribute(org.gradle.api.attributes.java.TargetJvmVersion.TARGET_JVM_VERSION_ATTRIBUTE, 11)
     }
 }
-repositories {
-    mavenCentral()
-    maven("https://maven.architectury.dev/")
-    maven("https://repository.ow2.org/nexus/content/repositories/releases/")
-}
 
 dependencies {
     shadowOnly(implementation("org.ow2.asm:asm:9.4")!!)
@@ -27,7 +22,7 @@ dependencies {
 tasks.withType(Jar::class) {
     manifest {
         attributes.apply {
-            this["Premain-Class"] = "moe.nea.modernjava.target.Pack200Retransformer"
+            this["Premain-Class"] = "moe.nea.modernjava.agent.Pack200Retransformer"
         }
     }
 }
@@ -35,7 +30,7 @@ tasks.withType(Jar::class) {
 tasks.shadowJar {
     archiveClassifier.set("")
     configurations = listOf(shadowOnly)
-    relocate("org.objectweb.asm", "moe.nea.modernjava.asm")
+    relocate("org.objectweb.asm", "moe.nea.modernjava.agent.dep.asm")
     // relocate("dev.architectury.pack200.java", "java.util.jar")
 }
 tasks.jar {

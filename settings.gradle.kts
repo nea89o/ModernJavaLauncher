@@ -18,6 +18,6 @@ pluginManagement {
     }
 }
 
-include("target")
+include("agent")
 
 rootProject.name = "ModernJavaLauncher"

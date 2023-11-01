@@ -1,12 +1,16 @@
-package moe.nea.modernjava.launch;
+package moe.nea.modernjava.launch.live;
 
+import moe.nea.modernjava.launch.transform.TransObjectHolderRef;
 import net.minecraft.launchwrapper.ITweaker;
 import net.minecraft.launchwrapper.LaunchClassLoader;
 
 import java.io.File;
 import java.util.List;
 
-public class FCPMixinAwareTweaker implements ITweaker {
+/**
+ * Tweaker class to inject {@link TransObjectHolderRef}
+ */
+public class FCPFixTweaker implements ITweaker {
     @Override
     public void acceptOptions(List<String> args, File gameDir, File assetsDir, String profile) {
     }
