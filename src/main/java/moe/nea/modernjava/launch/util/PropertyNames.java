@@ -13,4 +13,9 @@ public class PropertyNames {
      * Starts a debugger on the given port if present.
      */
     public static final String DEBUG_PORT = "modernjava.debugport";
+
+    /**
+     * Scans the given directories for java binaries.
+     */
+    public static final String JAVA_SCAN_PATH = "modernjava.scanpath";
 }

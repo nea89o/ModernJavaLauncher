@@ -46,7 +46,19 @@ public class FCPRelauncher {
     }
 
     public static File findJavaLauncher() {
-        return new File("/home/nea/.sdkman/candidates/java/16.0.2-tem/bin/java");
+        JavaScanner javaScanner = new JavaScanner();
+        javaScanner.scanDefaultPaths();
+        javaScanner.prettyPrint();
+        JavaScanner.LocalJavaVersion candidate = javaScanner.findCandidate();
+        if (candidate == null) {
+            System.err.println("Looks like we couldn't find a java candidate. Either install one, or if you have one" +
+                    " and we just cannot find it, specify -D" + PropertyNames.JAVA_SCAN_PATH + "=<java home here>." +
+                    " We need a Java 16 JDK. Exiting now.");
+            IAMFML.shutdown(1);
+            throw new RuntimeException();
+        }
+        System.out.println("Choosing Java Candidate:\n" + candidate.prettyPrint());
+        return candidate.getJavaBinary();
     }
 
     public static File findAgentJar() {
