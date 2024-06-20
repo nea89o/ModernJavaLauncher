@@ -12,8 +12,8 @@ val shadowOnly: Configuration by configurations.creating {
 }
 
 dependencies {
-    shadowOnly(implementation("org.ow2.asm:asm:9.4")!!)
-    shadowOnly(implementation("org.ow2.asm:asm-commons:9.4")!!)
+    implementation("org.ow2.asm:asm:9.7")
+    implementation("org.ow2.asm:asm-commons:9.7")
     shadowOnly("dev.architectury:architectury-pack200:0.1.3")
     shadowOnly("org.apache.commons:commons-lang3:3.13.0")
 }
@@ -28,8 +28,6 @@ tasks.withType(Jar::class) {
 tasks.shadowJar {
     archiveClassifier.set("")
     configurations = listOf(shadowOnly)
-    relocate("org.objectweb.asm", "moe.nea.modernjava.agent.dep.asm")
-    // relocate("dev.architectury.pack200.java", "java.util.jar")
 }
 tasks.jar {
     archiveClassifier.set("thin")
